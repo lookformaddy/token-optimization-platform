@@ -1,0 +1,31 @@
+# CI for the Token Optimization Platform.
+# Ships under docs/ — activate by moving to .github/workflows/ci.yml.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run tests
+        run: PYTHONPATH=src python -m pytest -q
+      - name: Run demo
+        run: PYTHONPATH=src python scripts/demo.py
+      - name: Compile check
+        run: python -m compileall -q src tests scripts
